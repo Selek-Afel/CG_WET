@@ -73,6 +73,8 @@ class Segment:
     #
     p : Point # Point, after input we compare and swap to guarantee that p.x <= q.x
     q : Point # Point
+    _a : float # double, slope of the segment
+    _b : float # double, y-intercept of the segment
     
     def __init__(self,p,q, id = 0):
         self.id = id
@@ -80,16 +82,18 @@ class Segment:
             p,q = q,p
         self.p = p
         self.q = q
+        self._a = (self.p.y - self.q.y) / (self.p.x - self.q.x)
+        self._b = self.p.y - (self._a * self.p.x)
         self.treeNode = None
     # def
     
     # line: y = ax + b. it is guaranteed that the line is not vertical (a is finite)
     def a(self): # () -> double
-        return ((self.p.y - self.q.y) / (self.p.x - self.q.x))
+        return self._a
     # def
     
     def b(self): # () -> double
-        return (self.p.y - (self.a() * self.p.x))
+        return self._b
     # def
     
     # the y-coordinate of the point on the segment whose x-coordinate ..
@@ -98,39 +102,30 @@ class Segment:
         return (self.a() * (x))+self.b()
     # def
     def __lt__(self, other): # (Segment) -> bool
+        if(self.id == other.id):
+            return False
         if self.p.x < other.p.x:
-            return not other.__lt__(self) # if self is to the left of other
+            return other.__gt__(self) # if self is to the left of other
         else:
-            if self.p.x == other.p.x and self.p.y == other.p.y:
-                return self.q.y < other.q.y
-            elif self.q.x == other.q.x and self.q.y == other.q.y:
+            if(self.p.x == other.p.x):
                 return self.p.y < other.p.y
-            else:
-                if self.p.y == other.calc(self.p.x):
-                    return self.p.y < other.p.y # if self is below other
-                else:
-                    return self.p.y < other.calc(self.p.x) # if self is below other
+            return self.p.y < other.calc(self.p.x) # if self is below other
     # def
     def __eq__(self, other):
-        return (self.p.x == other.p.x and self.p.y == other.p.y and
-                self.q.x == other.q.x and self.q.y == other.q.y)
+        return (self.id == other.id)
     # def
     def __ne__(self, other):
         return not self.__eq__(other)
     # def
     def __gt__(self, other): # (Segment) -> bool
+        if self.id == other.id:
+            return False
         if self.p.x < other.p.x:
-            return not self.__lt__(other)
+            return other.__lt__(self)
         else:
-            if self.p.x == other.p.x and self.p.y == other.p.y:
-                return self.q.y > other.q.y
-            elif self.q.x == other.q.x and self.q.y == other.q.y:
+            if self.p.x == other.p.x:
                 return self.p.y > other.p.y
-            else:
-                if self.p.y == other.calc(self.p.x):
-                    return self.p.y > other.p.y # if self is above other
-                else:
-                    return self.p.y > other.calc(self.p.x)
+            return self.p.y > other.calc(self.p.x)
     # if self is above other
     # def
     

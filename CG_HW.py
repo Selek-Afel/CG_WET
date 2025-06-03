@@ -13,7 +13,9 @@ intersections = []
 # used for checking if the intersection point is inside the event tree
 # (initially set to empty)
 segment_pairs = []
-
+def pair_not_exist(pairs_tree, seg1_id, seg2_id):
+    # Check if the pair exists in the list
+    return pairs_tree.count((seg1_id, seg2_id)) == 0 and pairs_tree.count((seg2_id, seg1_id)) == 0
 def above_and_below(seg, status): # (Segment, AVLtree) -> Segment
     # Check for intersections with the segment above and below
     lower_index = status.bisect_left(seg)-1
@@ -33,14 +35,21 @@ def swap_segments_at_intersection(status, seg1, seg2, intersection): # (AVLtree,
     # This is done to maintain the order of the segments in the status
     status.remove(seg1)
     status.remove(seg2)
-    seg1.p = intersection
-    seg2.p = intersection
+    curr_x = intersection.x
+    curr_y = intersection.y
+    a1 = seg1.a()
+    a2 = seg2.a()
+    seg1.p.x = curr_x + 0.00001  # small perturbation to avoid precision issues
+    seg2.p.x = curr_x + 0.00001  # small perturbation to avoid precision issues
+    seg1.p.y = curr_y + a1 * 0.00001
+    seg2.p.y = curr_y + a2 * 0.00001
     status.add(seg1)
     status.add(seg2)
     
 # Read the input from standard input
 lines = sys.stdin.readlines()
-
+# with open('test.txt', 'r') as f:
+#     lines = f.readlines()
 test_cases = int(lines[0].strip())
 index = 1
 
@@ -89,12 +98,12 @@ for i in range(test_cases):
             below, above = above_and_below(event.segment, status)
             if above is not None: # Check for intersection with the segment above
                 intersection = CG.intersection(event.segment, above)
-                if intersection is not None and segment_pairs[i].count((intersection.segment.id, intersection.segment2.id)) == 0:
+                if intersection is not None and pair_not_exist(segment_pairs[i], intersection.segment.id, intersection.segment2.id):
                     event_points[i].insert(intersection)
                     segment_pairs[i].add((intersection.segment.id, intersection.segment2.id))
             if below is not None: # Check for intersection with the segment below
                 intersection = CG.intersection(event.segment, below)
-                if intersection is not None and segment_pairs[i].count((intersection.segment.id, intersection.segment2.id)) == 0:
+                if intersection is not None and pair_not_exist(segment_pairs[i], intersection.segment.id, intersection.segment2.id):
                     event_points[i].insert(intersection)
                     segment_pairs[i].add((intersection.segment.id, intersection.segment2.id))
         
@@ -105,7 +114,7 @@ for i in range(test_cases):
             status.remove(event.segment)
             if above is not None and below is not None:
                 intersection = CG.intersection(above, below)
-                if intersection is not None and segment_pairs[i].count((intersection.segment.id, intersection.segment2.id)) == 0:
+                if intersection is not None and pair_not_exist(segment_pairs[i], intersection.segment.id, intersection.segment2.id):
                     event_points[i].insert(intersection)
                     segment_pairs[i].add((intersection.segment.id, intersection.segment2.id))
         
@@ -121,13 +130,13 @@ for i in range(test_cases):
                 if upper_index < len(status):
                     above = status[upper_index]
                     intersection = CG.intersection(above, event.segment)
-                    if intersection is not None and segment_pairs[i].count((intersection.segment.id, intersection.segment2.id)) == 0:
+                    if intersection is not None and pair_not_exist(segment_pairs[i], intersection.segment.id, intersection.segment2.id):
                         event_points[i].insert(intersection)
                         segment_pairs[i].add((intersection.segment.id, intersection.segment2.id))
                 if lower_index >= 0:
                     below = status[lower_index]
                     intersection = CG.intersection(below, event.segment2)
-                    if intersection is not None and segment_pairs[i].count((intersection.segment.id, intersection.segment2.id)) == 0:
+                    if intersection is not None and pair_not_exist(segment_pairs[i], intersection.segment.id, intersection.segment2.id):
                         event_points[i].insert(intersection)
                         segment_pairs[i].add((intersection.segment.id, intersection.segment2.id))
             else:
@@ -136,20 +145,23 @@ for i in range(test_cases):
                 if upper_index < len(status):
                     above = status[upper_index]
                     intersection = CG.intersection(above, event.segment2)
-                    if intersection is not None and segment_pairs[i].count((intersection.segment.id, intersection.segment2.id)) == 0:
+                    if intersection is not None and pair_not_exist(segment_pairs[i], intersection.segment.id, intersection.segment2.id):
                         event_points[i].insert(intersection)
                         segment_pairs[i].add((intersection.segment.id, intersection.segment2.id))
                 if lower_index >= 0:
                     below = status[lower_index]
                     intersection = CG.intersection(below, event.segment)
-                    if intersection is not None and segment_pairs[i].count((intersection.segment.id, intersection.segment2.id)) == 0:
+                    if intersection is not None and pair_not_exist(segment_pairs[i], intersection.segment.id, intersection.segment2.id):
                         event_points[i].insert(intersection)
                         segment_pairs[i].add((intersection.segment.id, intersection.segment2.id))
                         
             # Swap the segments in the status
             # This is done to maintain the order of the segments in the status
             swap_segments_at_intersection(status, event.segment, event.segment2, event)
-    print(intersections[i], '\n')
+    print(intersections[i])
 
-    # for pt in intersection_pts[i]:
-    #     print(pt.x, " ", pt.y, " \n")
+# with open('output_HW.txt', 'w') as f:
+#     for j in range(test_cases):
+#         f.write(str(intersections[j]) + "\n")
+#     # for pt in intersection_pts[i]:
+#     #     print(pt.x, " ", pt.y, " \n")

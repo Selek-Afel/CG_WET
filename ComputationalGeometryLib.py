@@ -22,32 +22,14 @@ class Point:
     # def
     def __lt__(self, other): # (Point) -> bool
         if self.x == other.x:
-            if self.y == other.y:
-                if self.eventType == other.eventType:
-                    if self.eventType == EventType.INTERSECTION:
-                        return False # No more than 2 segments can intersect at the same point
-                    else:
-                        return self.segment < other.segment
-                else:
-                    return self.eventType < other.eventType
-            else:
-                return self.y < other.y
+            return self.y < other.y
         else:
             return self.x < other.x
     # def
     def __eq__(self, other): # (Point) -> bool
         if(other is None):
             return (self is None)
-        if(self.eventType == EventType.INTERSECTION and
-           other.eventType == EventType.INTERSECTION):
-            return (self.segment == other.segment and
-                    self.segment2 == other.segment2) or (self.segment2 == other.segment and
-                    self.segment == other.segment)
-        else:
-            return (self.x == other.x and self.y == other.y and
-                self.eventType == other.eventType and
-                self.segment == other.segment and
-                self.segment2 == other.segment2)
+        return (self.x == other.x and self.y == other.y)
     # def
     def __ne__(self, other): # (Point) -> bool
         return not self.__eq__(other)
@@ -147,15 +129,6 @@ def is_left_turn(a, b, c): # (Point,Point,Point) -> bool
     y2 = b.y
     y3 = c.y
     return ((x1 * (y2 - y3)) + (x2 * (y3 - y1)) + (x3 * (y1 - y2))) > 0
-# def
-def collinear(a, b, c): # (Point,Point,Point) -> bool
-    x1 = a.x
-    x2 = b.x
-    x3 = c.x
-    y1 = a.y
-    y2 = b.y
-    y3 = c.y
-    return ((x1 * (y2 - y3)) + (x2 * (y3 - y1)) + (x3 * (y1 - y2))) == 0
 # def
 def intersection(s1, s2): # (segment,segment) -> Point | None
     if ((is_left_turn(s1.p, s1.q, s2.p) != is_left_turn(s1.p, s1.q, s2.q)) and
